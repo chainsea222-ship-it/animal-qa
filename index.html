@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>彰化縣動物防疫所 客服查詢系統</title>
+<style>
+  :root {
+    --blue-50:#E6F1FB;--blue-200:#85B7EB;--blue-400:#378ADD;--blue-600:#185FA5;--blue-800:#0C447C;
+    --teal-50:#E1F5EE;--teal-600:#0F6E56;
+    --amber-50:#FAEEDA;--amber-600:#854F0B;
+    --red-50:#FCEBEB;--red-600:#A32D2D;--red-200:#F09595;
+    --purple-50:#EEEDFE;--purple-600:#534AB7;--purple-800:#3C3489;
+    --green-50:#EAF3DE;--green-600:#3B6D11;
+    --pink-50:#FBEAF0;--pink-600:#993556;
+    --gray-50:#F1EFE8;--gray-100:#D3D1C7;--gray-400:#888780;--gray-600:#5F5E5A;
+    --bg:#fff;--bg2:#f7f6f3;--bg3:#f0efe9;
+    --text:#1a1a18;--text2:#5F5E5A;--text3:#888780;
+    --border:rgba(0,0,0,.10);--border2:rgba(0,0,0,.18);
+    --r:8px;--rl:12px;
+    --shadow:0 1px 4px rgba(0,0,0,.06),0 0 0 0.5px rgba(0,0,0,.08);
+    --shadow-md:0 4px 20px rgba(0,0,0,.12),0 0 0 0.5px rgba(0,0,0,.08);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif;background:var(--bg3);color:var(--text);font-size:14px;line-height:1.6;}
+  .shell{display:flex;min-height:100vh;}
+  .sidebar{width:220px;flex-shrink:0;background:var(--bg);border-right:0.5px solid var(--border);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;}
+  .main{flex:1;min-width:0;padding:28px 32px;max-width:960px;}
+  .logo{padding:18px 16px 14px;border-bottom:0.5px solid var(--border);}
+  .logo-title{font-size:13px;font-weight:600;line-height:1.4;}
+  .logo-sub{font-size:11px;color:var(--text3);margin-top:2px;}
+  .logo-sync{font-size:10px;color:var(--text3);margin-top:6px;display:flex;align-items:center;gap:4px;}
+  .sync-dot{width:6px;height:6px;border-radius:50%;background:#3B6D11;flex-shrink:0;}
+  .sync-dot.offline{background:#A32D2D;}
+  .sync-dot.loading{background:#854F0B;}
+  .nav{padding:10px 8px;flex:1;}
+  .nav-sec{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;padding:10px 10px 4px;}
+  .nav-item{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:var(--r);cursor:pointer;font-size:13px;color:var(--text2);transition:all .12s;margin-bottom:1px;}
+  .nav-item:hover{background:var(--bg2);color:var(--text);}
+  .nav-item.active{background:var(--blue-50);color:var(--blue-800);font-weight:500;}
+  .nav-icon{font-size:15px;width:20px;text-align:center;}
+  .nav-badge{margin-left:auto;font-size:10px;background:var(--gray-100);color:var(--gray-600);padding:1px 6px;border-radius:20px;}
+  .nav-item.active .nav-badge{background:var(--blue-200);color:var(--blue-800);}
+  .sidebar-foot{padding:12px 8px;border-top:0.5px solid var(--border);}
+  .admin-btn{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:var(--r);cursor:pointer;font-size:12px;color:var(--text3);transition:all .12s;width:100%;background:none;border:none;font-family:inherit;}
+  .admin-btn:hover{background:var(--bg2);color:var(--text);}
+  .ph{margin-bottom:20px;}
+  .ph-title{font-size:20px;font-weight:600;}
+  .ph-desc{font-size:13px;color:var(--text3);margin-top:3px;}
+  .sw{position:relative;margin-bottom:16px;}
+  .sw input{width:100%;padding:9px 14px 9px 36px;border:0.5px solid var(--border2);border-radius:var(--rl);font-size:14px;background:var(--bg);color:var(--text);outline:none;transition:border-color .15s;font-family:inherit;}
+  .sw input:focus{border-color:var(--blue-400);box-shadow:0 0 0 3px rgba(55,138,221,.12);}
+  .sw-icon{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:15px;pointer-events:none;}
+  .tag{display:inline-flex;align-items:center;font-size:11px;padding:2px 8px;border-radius:20px;white-space:nowrap;font-weight:500;}
+  .tag-rescue{background:var(--teal-50);color:var(--teal-600);}
+  .tag-capture{background:var(--amber-50);color:var(--amber-600);}
+  .tag-body{background:var(--red-50);color:var(--red-600);}
+  .tag-abuse{background:var(--pink-50);color:var(--pink-600);}
+  .tag-adopt{background:var(--purple-50);color:var(--purple-800);}
+  .tag-vaccine{background:var(--green-50);color:var(--green-600);}
+  .tag-spay{background:var(--blue-50);color:var(--blue-600);}
+  .tag-found{background:var(--gray-50);color:var(--gray-600);}
+  .tag-urgent{background:var(--red-50);color:var(--red-600);border:0.5px solid var(--red-200);}
+  .tag-vet{background:var(--teal-50);color:var(--teal-600);}
+  .chips{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:14px;}
+  .chip{padding:4px 11px;border-radius:20px;font-size:12px;cursor:pointer;border:0.5px solid var(--border2);color:var(--text2);background:var(--bg);transition:all .12s;}
+  .chip:hover{border-color:var(--blue-400);color:var(--blue-600);}
+  .chip.active{background:var(--blue-50);border-color:var(--blue-400);color:var(--blue-800);font-weight:500;}
+  .qa-list{display:flex;flex-direction:column;gap:6px;}
+  .qa-card{background:var(--bg);border-radius:var(--rl);border:0.5px solid var(--border);overflow:hidden;transition:border-color .15s,box-shadow .15s;}
+  .qa-card:hover{border-color:var(--border2);box-shadow:var(--shadow);}
+  .qa-card.open{border-color:var(--blue-400);box-shadow:var(--shadow);}
+  .qa-head{display:flex;align-items:flex-start;gap:10px;padding:12px 14px;cursor:pointer;user-select:none;}
+  .qa-q{flex:1;font-size:14px;color:var(--text);line-height:1.5;}
+  .qa-chev{color:var(--text3);font-size:12px;flex-shrink:0;margin-top:3px;transition:transform .2s;}
+  .qa-card.open .qa-chev{transform:rotate(180deg);}
+  .qa-body{display:none;padding:0 14px 14px;border-top:0.5px solid var(--border);}
+  .qa-card.open .qa-body{display:block;}
+  .qa-ans{padding-top:10px;color:var(--text2);white-space:pre-wrap;font-size:13px;line-height:1.75;}
+  .qa-meta{margin-top:10px;}
+  .qa-contact{font-size:12px;background:var(--bg2);padding:4px 10px;border-radius:var(--r);color:var(--text2);display:inline-block;}
+  .qa-contact strong{color:var(--text);}
+  .sop-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:12px;}
+  .sop-card{background:var(--bg);border-radius:var(--rl);border:0.5px solid var(--border);padding:14px 16px;}
+  .sop-head{display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap;}
+  .sop-title{font-size:14px;font-weight:500;}
+  .sop-step{display:flex;gap:10px;align-items:flex-start;padding:6px 0;border-bottom:0.5px solid var(--border);}
+  .sop-step:last-child{border-bottom:none;padding-bottom:0;}
+  .step-n{width:20px;height:20px;border-radius:50%;background:var(--blue-50);color:var(--blue-800);font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;}
+  .step-t{font-size:13px;color:var(--text2);line-height:1.6;}
+  .hl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px;margin-bottom:20px;}
+  .hl-card{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--rl);padding:12px 14px;}
+  .hl-label{font-size:11px;color:var(--text3);margin-bottom:4px;}
+  .hl-num{font-size:18px;font-weight:600;color:var(--text);}
+  .hl-sub{font-size:11px;color:var(--text3);margin-top:2px;}
+  .sec-label{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;margin-top:18px;}
+  .sec-label:first-child{margin-top:0;}
+  .cg{margin-bottom:20px;}
+  .cg-dept{font-size:13px;font-weight:600;padding-bottom:6px;border-bottom:0.5px solid var(--border);margin-bottom:8px;}
+  .c-row{display:flex;align-items:center;gap:10px;padding:7px 12px;background:var(--bg);border:0.5px solid var(--border);border-radius:var(--r);margin-bottom:4px;}
+  .c-name{font-weight:500;min-width:56px;font-size:13px;}
+  .c-duty{color:var(--text3);flex:1;font-size:12px;}
+  .c-tel{font-size:12px;color:var(--blue-600);white-space:nowrap;}
+  .c-warn{margin-top:8px;padding:8px 12px;background:var(--amber-50);border-radius:var(--r);font-size:12px;color:var(--amber-600);}
+  .vet-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:8px;}
+  .vet-card{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--rl);padding:12px 14px;}
+  .vet-name{font-size:14px;font-weight:500;margin-bottom:6px;}
+  .vet-info{font-size:12px;color:var(--text3);line-height:1.9;}
+  .vet-info span{color:var(--text2);}
+  .empty{text-align:center;padding:40px 20px;color:var(--text3);}
+  .empty-icon{font-size:32px;margin-bottom:8px;}
+  .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;align-items:center;justify-content:center;}
+  .overlay.show{display:flex;}
+  .modal{background:var(--bg);border-radius:16px;box-shadow:var(--shadow-md);width:620px;max-width:96vw;max-height:90vh;display:flex;flex-direction:column;}
+  .modal-head{padding:18px 20px 14px;border-bottom:0.5px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+  .modal-title{font-size:16px;font-weight:600;}
+  .modal-x{background:none;border:none;font-size:18px;cursor:pointer;color:var(--text3);padding:2px 6px;border-radius:4px;}
+  .modal-x:hover{background:var(--bg2);}
+  .modal-body{padding:18px 20px;overflow-y:auto;flex:1;}
+  .modal-foot{padding:14px 20px;border-top:0.5px solid var(--border);display:flex;gap:8px;justify-content:flex-end;}
+  .adm-tabs{display:flex;gap:4px;margin-bottom:18px;border-bottom:0.5px solid var(--border);}
+  .adm-tab{padding:7px 14px;font-size:13px;cursor:pointer;color:var(--text3);border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .12s;}
+  .adm-tab:hover{color:var(--text);}
+  .adm-tab.active{color:var(--blue-600);border-bottom-color:var(--blue-400);font-weight:500;}
+  .adm-sec{display:none;}
+  .adm-sec.show{display:block;}
+  .adm-table{width:100%;border-collapse:collapse;font-size:13px;}
+  .adm-table th{text-align:left;padding:6px 10px;font-weight:500;color:var(--text3);font-size:11px;text-transform:uppercase;letter-spacing:.04em;border-bottom:0.5px solid var(--border);}
+  .adm-table td{padding:8px 10px;border-bottom:0.5px solid var(--border);vertical-align:middle;color:var(--text2);}
+  .adm-table tr:last-child td{border-bottom:none;}
+  .adm-table tr:hover td{background:var(--bg2);}
+  .export-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;padding:12px 14px;background:var(--bg2);border-radius:var(--rl);align-items:center;}
+  .export-label{font-size:12px;color:var(--text3);}
+  .setup-box{background:var(--blue-50);border:0.5px solid var(--blue-200);border-radius:var(--rl);padding:18px 20px;margin-bottom:16px;}
+  .setup-box h3{font-size:14px;font-weight:600;color:var(--blue-800);margin-bottom:10px;}
+  .setup-box p{font-size:13px;color:var(--blue-800);line-height:1.7;margin-bottom:8px;}
+  .setup-box code{background:rgba(255,255,255,.7);padding:2px 6px;border-radius:4px;font-size:12px;font-family:monospace;}
+  .setup-box a{color:var(--blue-600);}
+  .btn{padding:7px 14px;border-radius:var(--r);font-size:13px;cursor:pointer;border:0.5px solid var(--border2);background:var(--bg);color:var(--text);transition:all .12s;font-family:inherit;}
+  .btn:hover{background:var(--bg2);}
+  .btn:disabled{opacity:.5;cursor:not-allowed;}
+  .btn-primary{background:var(--blue-600);color:#fff;border-color:var(--blue-600);}
+  .btn-primary:hover{background:var(--blue-800);border-color:var(--blue-800);}
+  .btn-danger{background:none;color:var(--red-600);border-color:transparent;}
+  .btn-danger:hover{background:var(--red-50);}
+  .btn-sm{padding:4px 10px;font-size:12px;}
+  .fr{margin-bottom:14px;}
+  .fl{display:block;font-size:12px;font-weight:500;color:var(--text2);margin-bottom:5px;}
+  .fi{width:100%;padding:8px 11px;border:0.5px solid var(--border2);border-radius:var(--r);font-size:13px;font-family:inherit;color:var(--text);background:var(--bg);outline:none;transition:border-color .15s;}
+  .fi:focus{border-color:var(--blue-400);box-shadow:0 0 0 3px rgba(55,138,221,.10);}
+  textarea.fi{min-height:90px;resize:vertical;}
+  select.fi{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23888' d='M6 8L1 3h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px;}
+  .fg{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .toast{position:fixed;bottom:24px;right:24px;padding:10px 18px;background:#1a1a18;color:#fff;border-radius:var(--r);font-size:13px;opacity:0;transition:opacity .25s;z-index:999;pointer-events:none;}
+  .toast.show{opacity:1;}
+  .toast.err{background:#A32D2D;}
+  .spinner{display:inline-block;width:12px;height:12px;border:2px solid var(--border2);border-top-color:var(--blue-400);border-radius:50%;animation:spin .6s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  @media(max-width:700px){.sidebar{display:none;}.main{padding:16px;}.sop-grid{grid-template-columns:1fr;}.fg{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<div class="shell">
+  <nav class="sidebar">
+    <div class="logo">
+      <div class="logo-title">彰化縣動物防疫所</div>
+      <div class="logo-sub">客服查詢系統</div>
+      <div class="logo-sync"><span class="sync-dot loading" id="syncDot"></span><span id="syncStatus">連線中…</span></div>
+    </div>
+    <div class="nav">
+      <div class="nav-sec">查詢</div>
+      <div class="nav-item active" onclick="showPage('qa',this)"><span class="nav-icon">❓</span>常見問答<span class="nav-badge" id="badge-qa">—</span></div>
+      <div class="nav-item" onclick="showPage('sop',this)"><span class="nav-icon">📋</span>案件SOP<span class="nav-badge" id="badge-sop">—</span></div>
+      <div class="nav-item" onclick="showPage('hotlines',this)"><span class="nav-icon">📞</span>常用電話</div>
+      <div class="nav-item" onclick="showPage('contacts',this)"><span class="nav-icon">👤</span>承辦人員</div>
+      <div class="nav-item" onclick="showPage('vets',this)"><span class="nav-icon">🏥</span>配合獸醫院<span class="nav-badge" id="badge-vets">—</span></div>
+    </div>
+    <div class="sidebar-foot">
+      <button class="admin-btn" onclick="openAdmin()">⚙ 後台管理</button>
+    </div>
+  </nav>
+  <main class="main">
+    <div id="page-qa">
+      <div class="ph"><div class="ph-title">常見問答</div><div class="ph-desc">點擊題目展開標準回答與承辦窗口</div></div>
+      <div class="sw"><span class="sw-icon">🔍</span><input type="text" id="qaSearch" placeholder="搜尋問題、關鍵字…" oninput="renderQA()"></div>
+      <div class="chips" id="qaChips"></div>
+      <div class="qa-list" id="qaList"><div class="empty"><div class="spinner"></div><p style="margin-top:12px;font-size:13px">載入資料中…</p></div></div>
+    </div>
+    <div id="page-sop" style="display:none">
+      <div class="ph"><div class="ph-title">案件 SOP 處理流程</div><div class="ph-desc">各類案件標準作業步驟</div></div>
+      <div class="sop-grid" id="sopGrid"></div>
+    </div>
+    <div id="page-hotlines" style="display:none">
+      <div class="ph"><div class="ph-title">常用電話</div><div class="ph-desc">緊急聯絡與各機構窗口</div></div>
+      <div id="hlContent"></div>
+    </div>
+    <div id="page-contacts" style="display:none">
+      <div class="ph"><div class="ph-title">承辦人員</div><div class="ph-desc">各課室業務承辦人員聯絡資訊（僅供內部使用）</div></div>
+      <div id="ctContent"></div>
+    </div>
+    <div id="page-vets" style="display:none">
+      <div class="ph"><div class="ph-title">配合獸醫院</div><div class="ph-desc">115年度配合救援之獸醫診療機構名冊</div></div>
+      <div class="vet-grid" id="vetGrid"></div>
+    </div>
+    <div id="page-admin" style="display:none">
+      <div class="ph"><div class="ph-title">⚙ 後台管理</div><div class="ph-desc">新增、修改、刪除各分頁資料（透過 GitHub API 儲存）</div></div>
+      <div id="adminContent"></div>
+    </div>
+  </main>
+</div>
+
+<div class="overlay" id="overlay" onclick="closeModalOut(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-head">
+      <div class="modal-title" id="modalTitle">編輯</div>
+      <button class="modal-x" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeModal()">取消</button>
+      <button class="btn btn-primary" id="modalSave">儲存</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════════════
+//  ★ 設定區：請在此填入你的 GitHub 資訊
+// ══════════════════════════════════════════════════
+const CONFIG = {
+  owner: '',        // 你的 GitHub 帳號，例如 'changhwa-animal'
+  repo:  '',        // repository 名稱，例如 'qa-system'
+  branch: 'main',  // 分支名稱（通常是 main）
+  dataFile: 'data.json',
+  token: ''         // GitHub Personal Access Token（後台登入後填入，不儲存在程式碼）
+};
+// ══════════════════════════════════════════════════
+
+const TAG_OPTS=[{v:"rescue",l:"動物救援"},{v:"capture",l:"捕犬/捕貓"},{v:"body",l:"動物屍體"},{v:"abuse",l:"虐待案件"},{v:"found",l:"動物拾獲"},{v:"vaccine",l:"狂犬病"},{v:"spay",l:"結紮補助"},{v:"adopt",l:"認領養"},{v:"info",l:"一般諮詢"}];
+
+let DATA=null;
+let fileSHA='';
+let sessionToken='';
+let activeFilter='all';
+let currentPage='qa';
+let currentAdmTab='qa';
+
+// ── Toast ──
+function toast(msg,err=false){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.className='toast'+(err?' err':'');
+  t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2800);
+}
+
+// ── GitHub API ──
+function ghHeaders(tok){
+  const h={'Content-Type':'application/json','Accept':'application/vnd.github+json'};
+  if(tok) h['Authorization']='Bearer '+tok;
+  return h;
+}
+
+async function loadData(){
+  const owner=CONFIG.owner||getOwnerFromURL();
+  const repo=CONFIG.repo||getRepoFromURL();
+  if(!owner||!repo){
+    setSync('offline','未設定 repository');
+    showSetupGuide();
+    return;
+  }
+  setSync('loading','載入中…');
+  try{
+    const url=`https://api.github.com/repos/${owner}/${repo}/contents/${CONFIG.dataFile}?ref=${CONFIG.branch}&t=${Date.now()}`;
+    const r=await fetch(url,{headers:ghHeaders(sessionToken)});
+    if(r.status===404){
+      // 檔案不存在，使用預設資料
+      DATA=JSON.parse(JSON.stringify(DEFAULT_DATA));
+      fileSHA='';
+      setSync('ok','使用預設資料');
+    } else if(!r.ok){
+      throw new Error('HTTP '+r.status);
+    } else {
+      const j=await r.json();
+      fileSHA=j.sha;
+      DATA=JSON.parse(atob(j.content.replace(/\n/g,'')));
+      setSync('ok','已同步 GitHub');
+    }
+    updateBadges();
+    renderCurrentPage();
+  }catch(e){
+    setSync('offline','無法連線');
+    if(!DATA) DATA=JSON.parse(JSON.stringify(DEFAULT_DATA));
+    updateBadges();
+    renderCurrentPage();
+    toast('無法連線 GitHub，顯示本機快取',true);
+  }
+}
+
+async function saveData(){
+  const owner=CONFIG.owner||getOwnerFromURL();
+  const repo=CONFIG.repo||getRepoFromURL();
+  const tok=sessionToken;
+  if(!tok) throw new Error('請先輸入 Personal Access Token');
+  const content=btoa(unescape(encodeURIComponent(JSON.stringify(DATA,null,2))));
+  const body={message:'Update data.json via QA system',content,branch:CONFIG.branch};
+  if(fileSHA) body.sha=fileSHA;
+  const r=await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${CONFIG.dataFile}`,{
+    method:'PUT',headers:ghHeaders(tok),body:JSON.stringify(body)
+  });
+  if(!r.ok){
+    const e=await r.json().catch(()=>({}));
+    throw new Error(e.message||'儲存失敗 HTTP '+r.status);
+  }
+  const j=await r.json();
+  fileSHA=j.content.sha;
+}
+
+function getOwnerFromURL(){
+  const m=location.hostname.match(/^(.+)\.github\.io$/);
+  return m?m[1]:'';
+}
+function getRepoFromURL(){
+  const parts=location.pathname.split('/').filter(Boolean);
+  return parts[0]||'';
+}
+
+// ── Sync status ──
+function setSync(state,msg){
+  const dot=document.getElementById('syncDot');
+  const txt=document.getElementById('syncStatus');
+  dot.className='sync-dot'+({ok:'',offline:' offline',loading:' loading'}[state]||'');
+  txt.textContent=msg;
+}
+
+// ── Setup guide ──
+function showSetupGuide(){
+  DATA=JSON.parse(JSON.stringify(DEFAULT_DATA));
+  updateBadges();
+  renderCurrentPage();
+}
+
+// ── Navigation ──
+function showPage(name,el){
+  currentPage=name;
+  document.querySelectorAll('[id^="page-"]').forEach(p=>p.style.display='none');
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+name).style.display='block';
+  if(el) el.classList.add('active');
+  renderCurrentPage();
+}
+function renderCurrentPage(){
+  if(!DATA) return;
+  ({qa:renderQA,sop:renderSOP,hotlines:renderHL,contacts:renderCT,vets:renderVets,admin:renderAdminAll})[currentPage]?.();
+}
+function updateBadges(){
+  if(!DATA) return;
+  document.getElementById('badge-qa').textContent=DATA.qa.length;
+  document.getElementById('badge-sop').textContent=DATA.sop.length;
+  document.getElementById('badge-vets').textContent=DATA.vets.length;
+}
+
+// ── QA ──
+function renderQA(){
+  const q=(document.getElementById('qaSearch').value||'').toLowerCase();
+  let items=DATA.qa;
+  if(activeFilter!=='all') items=items.filter(x=>x.tag===activeFilter);
+  if(q) items=items.filter(x=>x.q.toLowerCase().includes(q)||x.a.toLowerCase().includes(q)||x.tagLabel.toLowerCase().includes(q));
+  const tags=['all',...new Set(DATA.qa.map(x=>x.tag))];
+  const tl={all:'全部'};DATA.qa.forEach(x=>tl[x.tag]=x.tagLabel);
+  document.getElementById('qaChips').innerHTML=tags.map(t=>`<div class="chip${activeFilter===t?' active':''}" onclick="setFilter('${t}')">${tl[t]}</div>`).join('');
+  if(!items.length){document.getElementById('qaList').innerHTML='<div class="empty"><div class="empty-icon">🔍</div>找不到符合的問答</div>';return;}
+  document.getElementById('qaList').innerHTML=items.map(item=>`
+    <div class="qa-card" id="qac-${item.id}">
+      <div class="qa-head" onclick="toggleQA(${item.id})">
+        <span class="tag tag-${item.tag}">${item.tagLabel}</span>
+        ${item.urgent?'<span class="tag tag-urgent">緊急</span>':''}
+        <span class="qa-q">${esc(item.q)}</span>
+        <span class="qa-chev">▾</span>
+      </div>
+      <div class="qa-body">
+        <div class="qa-ans">${esc(item.a)}</div>
+        <div class="qa-meta">${item.contact?`<span class="qa-contact">承辦窗口：<strong>${esc(item.contact)}</strong></span>`:''}</div>
+      </div>
+    </div>`).join('');
+}
+function setFilter(f){activeFilter=f;renderQA();}
+function toggleQA(id){document.getElementById('qac-'+id)?.classList.toggle('open');}
+
+// ── SOP ──
+function renderSOP(){
+  document.getElementById('sopGrid').innerHTML=DATA.sop.map(s=>`
+    <div class="sop-card">
+      <div class="sop-head"><span class="tag tag-${s.tag}">${s.tagLabel}</span>${s.urgent?'<span class="tag tag-urgent">立即處理</span>':''}<span class="sop-title">${esc(s.title)}</span></div>
+      ${s.steps.map((st,i)=>`<div class="sop-step"><div class="step-n">${i+1}</div><div class="step-t">${esc(st)}</div></div>`).join('')}
+    </div>`).join('');
+}
+
+// ── Hotlines ──
+function renderHL(){
+  const groups=[...new Set(DATA.hotlines.map(h=>h.group))];
+  document.getElementById('hlContent').innerHTML=groups.map(g=>`
+    <div class="sec-label">${esc(g)}</div>
+    <div class="hl-grid">
+      ${DATA.hotlines.filter(h=>h.group===g).map(h=>`
+        <div class="hl-card"><div class="hl-label">${esc(h.name)}</div><div class="hl-num">${esc(h.number)}</div>${h.note?`<div class="hl-sub">${esc(h.note)}</div>`:''}</div>
+      `).join('')}
+    </div>`).join('');
+}
+
+// ── Contacts ──
+function renderCT(){
+  const depts=[...new Set(DATA.contacts.map(c=>c.dept))];
+  document.getElementById('ctContent').innerHTML=depts.map(d=>`
+    <div class="cg"><div class="cg-dept">${esc(d)}</div>
+    ${DATA.contacts.filter(c=>c.dept===d).map(c=>`
+      <div class="c-row"><div class="c-name">${esc(c.name)}</div><div class="c-duty">${esc(c.title)}・${esc(c.duty)}</div><div class="c-tel">${esc(c.ext||c.mobile)}</div></div>
+    `).join('')}</div>`).join('')+
+    '<div class="c-warn">⚠ 承辦人員行動電話僅供內部使用，請勿提供給民眾</div>';
+}
+
+// ── Vets ──
+function renderVets(){
+  document.getElementById('vetGrid').innerHTML=DATA.vets.map(v=>`
+    <div class="vet-card">
+      <div class="vet-name">${esc(v.name)} <span class="tag tag-vet" style="font-size:10px">${esc(v.area)}</span></div>
+      <div class="vet-info">負責人：<span>${esc(v.head)}</span><br>地址：<span>${esc(v.addr)}</span><br>電話：<span>${esc(v.tel)}</span><br>營業時間：<span>${esc(v.hours)}</span></div>
+    </div>`).join('');
+}
+
+// ── Admin ──
+function openAdmin(){
+  showPage('admin',null);
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+}
+
+function renderAdminAll(){
+  const needSetup=!CONFIG.owner||!CONFIG.repo;
+  document.getElementById('adminContent').innerHTML=`
+    ${needSetup?`
+    <div class="setup-box">
+      <h3>📋 首次設定說明</h3>
+      <p>後台管理需要透過 <strong>GitHub API</strong> 儲存資料。請按以下步驟完成設定：</p>
+      <p><strong>步驟一</strong>：在 GitHub 建立 repository，上傳 <code>index.html</code> 和 <code>data.json</code></p>
+      <p><strong>步驟二</strong>：開啟 GitHub Pages（Settings → Pages → Source: main branch）</p>
+      <p><strong>步驟三</strong>：申請 Personal Access Token（Settings → Developer settings → Tokens (classic) → 勾選 <code>repo</code> 權限）</p>
+      <p><strong>步驟四</strong>：在下方「Token 設定」填入帳號、repo 名稱與 Token，即可開始使用後台</p>
+      <p>詳細步驟請參閱部署說明書。</p>
+    </div>`:``}
+    <div class="export-row">
+      <span class="export-label">GitHub 設定：</span>
+      <input class="fi" id="cfg-owner" placeholder="GitHub 帳號" value="${CONFIG.owner}" style="width:140px;padding:5px 8px;font-size:12px;">
+      <input class="fi" id="cfg-repo" placeholder="Repository 名稱" value="${CONFIG.repo}" style="width:160px;padding:5px 8px;font-size:12px;">
+      <input class="fi" id="cfg-token" placeholder="Personal Access Token" type="password" value="${sessionToken}" style="width:200px;padding:5px 8px;font-size:12px;">
+      <button class="btn btn-sm btn-primary" onclick="saveConfig()">套用</button>
+    </div>
+    <div class="adm-tabs">
+      <div class="adm-tab active" onclick="switchAdmTab('qa',this)">常見問答</div>
+      <div class="adm-tab" onclick="switchAdmTab('sop',this)">案件SOP</div>
+      <div class="adm-tab" onclick="switchAdmTab('hotlines',this)">常用電話</div>
+      <div class="adm-tab" onclick="switchAdmTab('contacts',this)">承辦人員</div>
+      <div class="adm-tab" onclick="switchAdmTab('vets',this)">配合獸醫院</div>
+    </div>
+    <div id="adm-qa" class="adm-sec show">
+      <div style="margin-bottom:10px"><button class="btn btn-primary btn-sm" onclick="openAddQA()">＋ 新增問答</button></div>
+      <table class="adm-table"><thead><tr><th>分類</th><th>問題</th><th>操作</th></tr></thead><tbody id="admQaBody"></tbody></table>
+    </div>
+    <div id="adm-sop" class="adm-sec">
+      <div style="margin-bottom:10px"><button class="btn btn-primary btn-sm" onclick="openAddSOP()">＋ 新增SOP</button></div>
+      <table class="adm-table"><thead><tr><th>分類</th><th>標題</th><th>步驟</th><th>操作</th></tr></thead><tbody id="admSopBody"></tbody></table>
+    </div>
+    <div id="adm-hotlines" class="adm-sec">
+      <div style="margin-bottom:10px"><button class="btn btn-primary btn-sm" onclick="openAddHL()">＋ 新增電話</button></div>
+      <table class="adm-table"><thead><tr><th>群組</th><th>名稱</th><th>號碼</th><th>操作</th></tr></thead><tbody id="admHLBody"></tbody></table>
+    </div>
+    <div id="adm-contacts" class="adm-sec">
+      <div style="margin-bottom:10px"><button class="btn btn-primary btn-sm" onclick="openAddCT()">＋ 新增人員</button></div>
+      <table class="adm-table"><thead><tr><th>課別</th><th>姓名</th><th>業務</th><th>分機</th><th>操作</th></tr></thead><tbody id="admCTBody"></tbody></table>
+    </div>
+    <div id="adm-vets" class="adm-sec">
+      <div style="margin-bottom:10px"><button class="btn btn-primary btn-sm" onclick="openAddVet()">＋ 新增獸醫院</button></div>
+      <table class="adm-table"><thead><tr><th>地區</th><th>院名</th><th>電話</th><th>操作</th></tr></thead><tbody id="admVetBody"></tbody></table>
+    </div>`;
+  renderAdmTables();
+}
+
+function saveConfig(){
+  CONFIG.owner=document.getElementById('cfg-owner').value.trim();
+  CONFIG.repo=document.getElementById('cfg-repo').value.trim();
+  sessionToken=document.getElementById('cfg-token').value.trim();
+  toast('設定已套用，重新載入資料…');
+  loadData();
+}
+
+function switchAdmTab(name,el){
+  currentAdmTab=name;
+  document.querySelectorAll('.adm-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.adm-sec').forEach(s=>s.classList.remove('show'));
+  el.classList.add('active');
+  document.getElementById('adm-'+name).classList.add('show');
+}
+
+function renderAdmTables(){
+  const qb=document.getElementById('admQaBody');
+  if(qb) qb.innerHTML=DATA.qa.map(x=>`<tr><td><span class="tag tag-${x.tag}">${x.tagLabel}</span></td><td style="max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(x.q)}</td><td style="white-space:nowrap"><button class="btn btn-sm" onclick="openEditQA(${x.id})">編輯</button><button class="btn btn-sm btn-danger" onclick="del('qa',${x.id})">刪除</button></td></tr>`).join('');
+  const sb=document.getElementById('admSopBody');
+  if(sb) sb.innerHTML=DATA.sop.map(x=>`<tr><td><span class="tag tag-${x.tag}">${x.tagLabel}</span></td><td>${esc(x.title)}</td><td>${x.steps.length}</td><td style="white-space:nowrap"><button class="btn btn-sm" onclick="openEditSOP(${x.id})">編輯</button><button class="btn btn-sm btn-danger" onclick="del('sop',${x.id})">刪除</button></td></tr>`).join('');
+  const hb=document.getElementById('admHLBody');
+  if(hb) hb.innerHTML=DATA.hotlines.map(x=>`<tr><td>${esc(x.group)}</td><td>${esc(x.name)}</td><td>${esc(x.number)}</td><td style="white-space:nowrap"><button class="btn btn-sm" onclick="openEditHL(${x.id})">編輯</button><button class="btn btn-sm btn-danger" onclick="del('hotlines',${x.id})">刪除</button></td></tr>`).join('');
+  const cb=document.getElementById('admCTBody');
+  if(cb) cb.innerHTML=DATA.contacts.map(x=>`<tr><td>${esc(x.dept)}</td><td>${esc(x.name)}</td><td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(x.duty)}</td><td>${esc(x.ext)}</td><td style="white-space:nowrap"><button class="btn btn-sm" onclick="openEditCT(${x.id})">編輯</button><button class="btn btn-sm btn-danger" onclick="del('contacts',${x.id})">刪除</button></td></tr>`).join('');
+  const vb=document.getElementById('admVetBody');
+  if(vb) vb.innerHTML=DATA.vets.map(x=>`<tr><td>${esc(x.area)}</td><td>${esc(x.name)}</td><td>${esc(x.tel)}</td><td style="white-space:nowrap"><button class="btn btn-sm" onclick="openEditVet(${x.id})">編輯</button><button class="btn btn-sm btn-danger" onclick="del('vets',${x.id})">刪除</button></td></tr>`).join('');
+}
+
+async function del(sec,id){
+  if(!confirm('確定要刪除這筆資料嗎？')) return;
+  DATA[sec]=DATA[sec].filter(x=>x.id!==id);
+  try{await saveData();toast('已刪除並同步至 GitHub');}
+  catch(e){toast('刪除失敗：'+e.message,true);await loadData();return;}
+  updateBadges();renderAdmTables();
+}
+
+// ── Modal helpers ──
+function openModal(title,body,onSave){
+  document.getElementById('modalTitle').textContent=title;
+  document.getElementById('modalBody').innerHTML=body;
+  document.getElementById('modalSave').onclick=onSave;
+  document.getElementById('overlay').classList.add('show');
+}
+function closeModal(){document.getElementById('overlay').classList.remove('show');}
+function closeModalOut(e){if(e.target===document.getElementById('overlay'))closeModal();}
+
+function nextId(arr){return arr.length?Math.max(...arr.map(x=>x.id))+1:1;}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+const TAG_SEL=(cur)=>`<select class="fi" id="f-tag">${TAG_OPTS.map(t=>`<option value="${t.v}"${t.v===cur?' selected':''}>${t.l}</option>`).join('')}</select>`;
+const UGS=(cur)=>`<select class="fi" id="f-urgent"><option value="0"${!cur?' selected':''}>否</option><option value="1"${cur?' selected':''}>是（紅色緊急標籤）</option></select>`;
+
+async function persist(sec,item,isNew){
+  if(isNew) DATA[sec].push(item);
+  else { const i=DATA[sec].findIndex(x=>x.id===item.id); if(i>=0) DATA[sec][i]=item; }
+  try{await saveData();toast('已儲存並同步至 GitHub ✓');}
+  catch(e){toast('⚠ 本機已更新，但 GitHub 同步失敗：'+e.message,true);}
+  updateBadges();closeModal();renderAdmTables();renderCurrentPage();
+}
+
+// QA
+function qaHTML(x){return`<div class="fr"><label class="fl">分類標籤</label>${TAG_SEL(x?.tag||'rescue')}</div><div class="fr"><label class="fl">問題（Q）</label><input class="fi" id="f-q" value="${x?esc(x.q):''}"></div><div class="fr"><label class="fl">回答（A）</label><textarea class="fi" id="f-a">${x?esc(x.a):''}</textarea></div><div class="fg"><div class="fr"><label class="fl">承辦窗口</label><input class="fi" id="f-contact" value="${x?esc(x.contact):''}"></div><div class="fr"><label class="fl">標示緊急</label>${UGS(x?.urgent)}</div></div>`;}
+function getQAVal(id){const tag=document.getElementById('f-tag');return{id,tag:tag.value,tagLabel:tag.options[tag.selectedIndex].text,q:document.getElementById('f-q').value.trim(),a:document.getElementById('f-a').value.trim(),contact:document.getElementById('f-contact').value.trim(),urgent:document.getElementById('f-urgent').value==='1'};}
+function openAddQA(){openModal('新增問答',qaHTML(null),()=>persist('qa',{...getQAVal(nextId(DATA.qa))},true));}
+function openEditQA(id){const x=DATA.qa.find(i=>i.id===id);openModal('編輯問答',qaHTML(x),()=>persist('qa',getQAVal(id),false));}
+
+// SOP
+function sopHTML(x){return`<div class="fg"><div class="fr"><label class="fl">分類標籤</label>${TAG_SEL(x?.tag||'rescue')}</div><div class="fr"><label class="fl">緊急</label>${UGS(x?.urgent)}</div></div><div class="fr"><label class="fl">SOP 標題</label><input class="fi" id="f-title" value="${x?esc(x.title):''}"></div><div class="fr"><label class="fl">處理步驟（每行一步）</label><textarea class="fi" id="f-steps" style="min-height:120px">${x?x.steps.join('\n'):''}</textarea></div>`;}
+function getSOPVal(id){const tag=document.getElementById('f-tag');return{id,tag:tag.value,tagLabel:tag.options[tag.selectedIndex].text,title:document.getElementById('f-title').value.trim(),urgent:document.getElementById('f-urgent').value==='1',steps:document.getElementById('f-steps').value.split('\n').map(s=>s.trim()).filter(Boolean)};}
+function openAddSOP(){openModal('新增SOP',sopHTML(null),()=>persist('sop',{...getSOPVal(nextId(DATA.sop))},true));}
+function openEditSOP(id){const x=DATA.sop.find(i=>i.id===id);openModal('編輯SOP',sopHTML(x),()=>persist('sop',getSOPVal(id),false));}
+
+// Hotline
+function hlHTML(x){return`<div class="fr"><label class="fl">群組名稱</label><input class="fi" id="f-group" value="${x?esc(x.group):''}" placeholder="緊急專線、機構聯絡…"></div><div class="fr"><label class="fl">電話名稱</label><input class="fi" id="f-name" value="${x?esc(x.name):''}"></div><div class="fr"><label class="fl">號碼</label><input class="fi" id="f-number" value="${x?esc(x.number):''}"></div><div class="fr"><label class="fl">備註</label><input class="fi" id="f-note" value="${x?esc(x.note):''}" placeholder="24小時、上班時間…"></div>`;}
+function getHLVal(id){return{id,group:document.getElementById('f-group').value.trim(),name:document.getElementById('f-name').value.trim(),number:document.getElementById('f-number').value.trim(),note:document.getElementById('f-note').value.trim()};}
+function openAddHL(){openModal('新增電話',hlHTML(null),()=>persist('hotlines',{...getHLVal(nextId(DATA.hotlines))},true));}
+function openEditHL(id){const x=DATA.hotlines.find(i=>i.id===id);openModal('編輯電話',hlHTML(x),()=>persist('hotlines',getHLVal(id),false));}
+
+// Contact
+function ctHTML(x){const depts=[...new Set(DATA.contacts.map(c=>c.dept)),'其他'];return`<div class="fg"><div class="fr"><label class="fl">課別</label><input class="fi" list="dl" id="f-dept" value="${x?esc(x.dept):''}"><datalist id="dl">${depts.map(d=>`<option value="${esc(d)}">`).join('')}</datalist></div><div class="fr"><label class="fl">職稱</label><input class="fi" id="f-title" value="${x?esc(x.title):''}"></div></div><div class="fg"><div class="fr"><label class="fl">姓名</label><input class="fi" id="f-name" value="${x?esc(x.name):''}"></div><div class="fr"><label class="fl">行動電話（內部）</label><input class="fi" id="f-mobile" value="${x?esc(x.mobile):''}"></div></div><div class="fr"><label class="fl">所內電話/分機</label><input class="fi" id="f-ext" value="${x?esc(x.ext):''}" placeholder="04-7620774#XXX"></div><div class="fr"><label class="fl">業務內容</label><textarea class="fi" style="min-height:60px" id="f-duty">${x?esc(x.duty):''}</textarea></div>`;}
+function getCTVal(id){return{id,dept:document.getElementById('f-dept').value.trim(),title:document.getElementById('f-title').value.trim(),name:document.getElementById('f-name').value.trim(),mobile:document.getElementById('f-mobile').value.trim(),ext:document.getElementById('f-ext').value.trim(),duty:document.getElementById('f-duty').value.trim()};}
+function openAddCT(){openModal('新增人員',ctHTML(null),()=>persist('contacts',{...getCTVal(nextId(DATA.contacts))},true));}
+function openEditCT(id){const x=DATA.contacts.find(i=>i.id===id);openModal('編輯人員',ctHTML(x),()=>persist('contacts',getCTVal(id),false));}
+
+// Vet
+function vetHTML(x){return`<div class="fg"><div class="fr"><label class="fl">地區</label><input class="fi" id="f-area" value="${x?esc(x.area):''}"></div><div class="fr"><label class="fl">負責人</label><input class="fi" id="f-head" value="${x?esc(x.head):''}"></div></div><div class="fr"><label class="fl">院所名稱</label><input class="fi" id="f-name" value="${x?esc(x.name):''}"></div><div class="fr"><label class="fl">地址</label><input class="fi" id="f-addr" value="${x?esc(x.addr):''}"></div><div class="fg"><div class="fr"><label class="fl">電話</label><input class="fi" id="f-tel" value="${x?esc(x.tel):''}"></div><div class="fr"><label class="fl">營業時間</label><input class="fi" id="f-hours" value="${x?esc(x.hours):''}"></div></div>`;}
+function getVetVal(id){return{id,area:document.getElementById('f-area').value.trim(),name:document.getElementById('f-name').value.trim(),head:document.getElementById('f-head').value.trim(),addr:document.getElementById('f-addr').value.trim(),tel:document.getElementById('f-tel').value.trim(),hours:document.getElementById('f-hours').value.trim()};}
+function openAddVet(){openModal('新增獸醫院',vetHTML(null),()=>persist('vets',{...getVetVal(nextId(DATA.vets))},true));}
+function openEditVet(id){const x=DATA.vets.find(i=>i.id===id);openModal('編輯獸醫院',vetHTML(x),()=>persist('vets',getVetVal(id),false));}
+
+// ── Default data ──
+const DEFAULT_DATA={qa:[{id:1,tag:"rescue",tagLabel:"動物救援",q:"民眾發現貓、狗受傷，要如何處理？",a:"請民眾撥打 1959 動保通報專線，由專線人員指引後續處理方式（上班時間或離線時段皆適用）。",contact:"張議仁 7620774#265",urgent:false},{id:2,tag:"found",tagLabel:"動物拾獲",q:"民眾拾獲寵物（烏龜、鸚鵡），希請處理？",a:"上班時間（08:00–12:00、13:00–17:00）：可送至本縣動物防疫所協尋飼主。\n離線時段：先將動物放置戳洞紙箱或置物箱中，給予適當飲水，於上班期間再送至本所。",contact:"林浩鋒 7620774#261",urgent:false},{id:3,tag:"rescue",tagLabel:"動物救援",q:"民眾發現保育類野生動物受傷，如何處理？",a:"以毛巾、手套或衣服包覆受傷動物，放置戳洞紙箱，暫勿餵食餵水。\n上班時間：先撥南投野生動物急救站（049-2761331 分機700,725）確認後送達，或送至本縣動防所。\n離線時段：先暫時安置，上班後再送至南投野生動物急救站或本所。",contact:"林浩鋒 7620774#261",urgent:false},{id:4,tag:"capture",tagLabel:"捕貓案件",q:"流浪貓在家附近聚集，要求捕捉？",a:"本縣目前無捕貓服務。\n可提供「貓摺疊式誘捕籠」免費外借服務，請撥 7620774#261 向本所預約登記。\n捕捉後可分享送養資訊，或親送至本縣流浪狗中途之家（芬園鄉大彰路一段875巷底，電話：04-8590638）。",contact:"林浩鋒 7620774#261",urgent:false},{id:5,tag:"capture",tagLabel:"捕犬案件",q:"流浪狗破壞農作物或追逐攻擊民眾，如何處理？",a:"請民眾撥打捕犬專線：04-8590010，提供流浪犬詳細資訊，錄案後由本所轉請各鄉鎮市公所清潔隊捕捉。\n各鄉鎮市公所清潔隊亦可主動出勤捕捉，民眾可向當地公所反映。",contact:"賴宛詩 7620774#262",urgent:false},{id:6,tag:"capture",tagLabel:"捕犬案件",q:"家門口有流浪狗，該找誰處理？",a:"請於上班時間撥打捕犬專線：04-8590010，由專人錄案後安排捕捉作業。",contact:"捕犬專線 04-8590010",urgent:false},{id:7,tag:"body",tagLabel:"動物屍體",q:"路邊有動物屍體（犬、貓、野生動物），怎麼辦？",a:"一般犬貓：請以黑色垃圾袋包裝，交由各鄉鎮市清潔隊處理。\n野生動物：請通報委外救援人員載回本所冰存，平日上班時間由疫病檢驗課派員處理。",contact:"疫病檢驗課",urgent:false},{id:8,tag:"abuse",tagLabel:"虐待案件",q:"發現有人虐待、毒殺或故意傷害動物？",a:"【重大動保案件】請立即通報。\n客服處理：立即電話通知動保課承辦人，提供案件詳情與通報人聯絡電話。\n民眾亦可至彰化縣動物防疫所臉書 Messenger 提供案件地址、時間、事由及相關證據。",contact:"動物保護課 7620774#260",urgent:true},{id:9,tag:"found",tagLabel:"動物拾獲",q:"路邊撿到貓狗（動物拾獲），要送去哪裡？",a:"第一步：建議先至動物醫院掃描晶片。\n若無晶片：送往流浪狗中途之家，或先行於社群平台尋找認養人。",contact:"",urgent:false},{id:10,tag:"vaccine",tagLabel:"狂犬病",q:"我家的狗、貓每年都要施打狂犬病嗎？未施打會被開罰嗎？",a:"犬貓滿三個月齡以上，或注射已逾一年，均需每年施打狂犬病疫苗，並戴上注射證明牌。\n本所將不定期稽查，未施打者依動物傳染病防治條例處以 30,000–150,000 元罰鍰。",contact:"",urgent:false},{id:11,tag:"vaccine",tagLabel:"狂犬病",q:"若遺失或損毀狂犬病預防注射證明牌，是否可補發？",a:"每年注射後均會核發該年度證明牌，故不進行補發作業。如有遺失或損毀，請備妥預防注射證明書備查即可。",contact:"",urgent:false},{id:12,tag:"vaccine",tagLabel:"狂犬病",q:"本縣有狂犬病病例嗎？目前國內狀況？",a:"本縣目前並無狂犬病陽性病例。\n請民眾遵守「二不一要」原則：\n・不要棄養寵物\n・不要接觸及捕捉野生動物\n・要為家中犬貓每年施打狂犬病疫苗",contact:"",urgent:false},{id:13,tag:"vaccine",tagLabel:"狂犬病",q:"彰化縣犬貓有免費狂犬病疫苗可施打嗎？",a:"僅靠山區高風險鄉鎮（二水鄉及芬園鄉）提供免費施打。\n本所每年辦理「狂犬病預防注射及寵物登記巡迴活動」，活動資訊請至本所官網「活動訊息」查詢。",contact:"",urgent:false},{id:14,tag:"rescue",tagLabel:"動物救援",q:"受傷的狗貓很兇，不敢抓怎麼辦？",a:"因動物疼痛所以會有防衛反應。建議以一大塊布或衣服蓋住受傷動物，防止咬傷，隔著布將動物放入紙箱即可。",contact:"",urgent:false},{id:15,tag:"rescue",tagLabel:"動物救援",q:"彰化縣有沒有急診的動物醫院？",a:"目前彰化沒有24小時急診動物醫院。\n台中有：全國動物醫院（04-23710496）。\n若無法立即就醫，可先移至安全地方，白天再送至本縣配合動物醫院或流浪狗中途之家。",contact:"",urgent:false},{id:16,tag:"body",tagLabel:"動物屍體",q:"路上遇到路殺的犬、貓屍體怎麼辦？",a:"可用黑色垃圾袋將犬貓屍體裝袋，交由地方清潔隊處理。\n若民眾有愛心，可洽詢動物醫院或網路上的寵物生命業者（費用自行負擔）。",contact:"",urgent:false},{id:17,tag:"spay",tagLabel:"結紮補助",q:"彰化縣有沒有補助犬貓結紮？",a:"本縣每年有絕育補助活動，資訊放於本所官網「活動訊息」。\n\n兩種補助方式：\n(1) 配合動物醫院：部分補助（公犬貓補助800元、母犬貓補助1,500元），其餘自費。\n(2) 免費混種犬貓3合1活動（限混種犬貓）：請至官網查詢報名。",contact:"",urgent:false},{id:18,tag:"capture",tagLabel:"捕犬案件",q:"有狗會追車咬人怎麼處理？",a:"流浪狗：撥打捕犬專線 04-8590010，提供詳細資訊，由本所轉請各鄉鎮市公所清潔隊執行捕捉。\n家犬：請提供相關事證或調查線索至本所臉書 Messenger，以利稽查人員前往稽查。",contact:"",urgent:false},{id:19,tag:"abuse",tagLabel:"虐待案件",q:"發現好像有人在虐待狗貓，我要怎麼做？",a:"請提供案件詳細地址、發生時間、事由及相關證據，至彰化縣動物防疫所臉書粉絲專頁 Messenger 檢舉。\n本所人員將於上班時間盡快回復。\n如有問題，請撥打 04-7620774。",contact:"動物保護課 04-7620774",urgent:false}],sop:[{id:1,tag:"capture",tagLabel:"捕貓案件",title:"捕貓案件",urgent:false,steps:["告知民眾目前本縣無捕貓服務","提供免費貓隻誘捕籠外借，請電話預約（7620774#261）","捕捉後協助提供送養資訊或中途之家地址"]},{id:2,tag:"body",tagLabel:"動物屍體",title:"動物屍體案件",urgent:false,steps:["確認屍體類型（犬貓 / 野生動物）","一般犬貓：指示民眾以黑色垃圾袋包裝，交清潔隊處理","野生動物：通報委外救援人員載回本所冰存，通知疫病檢驗課"]},{id:3,tag:"found",tagLabel:"一般動保",title:"一般動保案件（疏縱/飼養不當/未晶片/未絕育）",urgent:false,steps:["確認案件類型與通報人資訊","填寫通報人資訊與案件地點","完成入案登記","上班時間由動物保護課承辦人員後續處理"]},{id:4,tag:"abuse",tagLabel:"重大虐待",title:"重大動保案件（虐待/毒殺/故意傷害）",urgent:true,steps:["立即電話通知動物保護課承辦人","提供案件詳情（地址、時間、事由）","提供通報人聯絡電話","確認承辦人已接到通知後結束案件"]},{id:5,tag:"found",tagLabel:"動物拾獲",title:"動物拾獲案件",urgent:false,steps:["建議民眾先送動物醫院掃描晶片","有晶片：協助聯繫原飼主","無晶片：建議送流浪狗中途之家，或先於社群平台協尋認養"]},{id:6,tag:"rescue",tagLabel:"動物救援",title:"動物救援案件（受傷犬貓）",urgent:false,steps:["優先請民眾撥打 1959 動保通報專線","或自行送至配合特約動物醫院","夜間無診：先安置動物於安全處，留下聯絡資料","次日上班後再通知承辦人"]},{id:7,tag:"capture",tagLabel:"捕犬案件",title:"捕犬案件",urgent:false,steps:["請民眾撥打捕犬專線：04-8590010","由專人錄案（需配合具名填寫通報單）","防疫所轉請當地鄉鎮市公所清潔隊安排捕捉","民眾需至現場配合指認犬隻"]}],hotlines:[{id:1,group:"緊急專線",name:"動保通報專線",number:"1959",note:"24小時"},{id:2,group:"緊急專線",name:"捕犬專線",number:"04-8590010",note:"週一~日 08:00–17:00"},{id:3,group:"機構聯絡",name:"動防所代表號",number:"04-7620774",note:"上班時間"},{id:4,group:"機構聯絡",name:"流浪狗中途之家",number:"04-8590638",note:"芬園鄉"},{id:5,group:"外部機構",name:"南投野生動物急救站",number:"049-2761331 #700,725",note:"上班時間"},{id:6,group:"外部機構",name:"台中全國動物醫院（急診）",number:"04-23710496",note:"24小時"},{id:7,group:"服務項目",name:"誘捕籠外借預約",number:"7620774#261",note:"上班時間"},{id:8,group:"服務項目",name:"寵物登記查詢",number:"7620774#261",note:"上班時間"}],contacts:[{id:1,dept:"動物保護課",title:"課長",name:"陳美君",duty:"綜理動物保護課課務",mobile:"0966-753065",ext:"04-7620774#260"},{id:2,dept:"動物保護課",title:"技士",name:"曹育銘",duty:"動物收容所管理・認領養推廣",mobile:"0976-006206",ext:"04-7620774#263"},{id:3,dept:"動物保護課",title:"技士",name:"張議仁",duty:"辦理動物保護案件及急難救援業務工作",mobile:"0928-959535",ext:"04-7620774#265"},{id:4,dept:"動物保護課",title:"臨時約雇",name:"黃嘉正",duty:"辦理動物保護案件及急難救援業務工作",mobile:"0979-235273",ext:"04-7620774#301"},{id:5,dept:"動物保護課",title:"技士",name:"呂慧明",duty:"犬貓絕育工作・野生動物救援業務",mobile:"0988-152803",ext:"04-7620774#268"},{id:6,dept:"動物保護課",title:"技佐",name:"洪麗瓊",duty:"犬貓寵物登記及狂犬病業務工作",mobile:"0963-226705",ext:"04-7620774#269"},{id:7,dept:"動物保護課",title:"技士",name:"江建忠",duty:"特定寵物業申請許可・輔導・查核",mobile:"0922-917087",ext:"04-7620774#261"},{id:8,dept:"動物保護課",title:"技佐",name:"賴宛詩",duty:"辦理本縣流浪犬捕捉相關業務工作",mobile:"0963-234038",ext:"04-7620774#262"},{id:9,dept:"疫病檢驗課",title:"課長",name:"陳美珠",duty:"綜理課務",mobile:"0905-916767",ext:""},{id:10,dept:"疫病檢驗課",title:"技士",name:"洪思婷",duty:"動物屍體檢驗工作",mobile:"0918-635563",ext:""},{id:11,dept:"疫病檢驗課",title:"技士",name:"江柏偉",duty:"動物屍體檢驗工作",mobile:"0921-387027",ext:""}],vets:[{id:1,area:"彰化市",name:"築愛動物醫院",head:"呂柏霆",addr:"彰化市民生南路51號",tel:"04-7239939",hours:"09:00–21:00"},{id:2,area:"彰化市",name:"慧光犬貓動物醫院",head:"吳倍宜",addr:"彰化市埔西街259號",tel:"04-7633320",hours:"09:00–19:00（週日休）"},{id:3,area:"彰化市",name:"大森林動物醫院",head:"莊子昇",addr:"彰化市中正路二段338號",tel:"04-7287562",hours:"09:00–20:30（週日休）"},{id:4,area:"員林市",name:"忠愛動物醫院",head:"張舒弼",addr:"員林市中山路2段490號",tel:"04-8324704",hours:"09:00–21:00（分時段）"},{id:5,area:"溪湖鎮",name:"惟仁動物醫院",head:"鄭淑文",addr:"溪湖鎮彰水路二段175號",tel:"04-8810093",hours:"09:00–21:00（不定休）"},{id:6,area:"和美鎮",name:"愛犬動物醫院",head:"呂志軒",addr:"和美鎮道周路553號",tel:"04-7567481",hours:"週一~六 08:30–21:00（週日休）"},{id:7,area:"二林鎮",name:"杏林獸醫院",head:"沈連吉",addr:"二林鎮仁愛路362號",tel:"04-8950710",hours:"週一~六 09:00–20:30（週日休）"}]};
+
+loadData();
+setInterval(loadData,60000);
+</script>
+</body>
+</html>
